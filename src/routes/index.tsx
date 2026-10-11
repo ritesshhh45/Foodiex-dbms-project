@@ -32,7 +32,7 @@ function Typewriter() {
   const [i, setI] = useState(0);
   const [txt, setTxt] = useState("");
   useEffect(() => {
-    const w = WORDS[i % WORDS.length];
+    const w = WORDS[i % WORDS.length] ?? "";
     if (txt.length < w.length) {
       const t = setTimeout(() => setTxt(w.slice(0, txt.length + 1)), 90);
       return () => clearTimeout(t);
