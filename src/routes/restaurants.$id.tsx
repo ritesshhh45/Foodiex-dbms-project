@@ -43,7 +43,7 @@ function RestaurantPage() {
   });
 
   const toggleFav = async () => {
-    if (!user) return toast.info("Sign in to save favourites");
+    if (!user) { toast.info("Sign in to save favourites"); return; }
     if (fav.data) await supabase.from("favorites").delete().eq("restaurant_id", id).eq("user_id", user.id);
     else await supabase.from("favorites").insert({ restaurant_id: id, user_id: user.id });
     qc.invalidateQueries({ queryKey: ["fav"] });

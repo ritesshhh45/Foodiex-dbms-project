@@ -47,15 +47,15 @@ function Checkout() {
 
   const applyCoupon = (c: string) => {
     const found = coupons.data?.find((x) => x.code.toUpperCase() === c.trim().toUpperCase());
-    if (!found) return toast.error("Invalid coupon");
-    if (cart.subtotal < Number(found.min_order)) return toast.error(`Add ${inr(Number(found.min_order) - cart.subtotal)} more to use ${found.code}`);
+    if (!found) { toast.error("Invalid coupon"); return; }
+    if (cart.subtotal < Number(found.min_order)) { toast.error(`Add ${inr(Number(found.min_order) - cart.subtotal)} more to use ${found.code}`); return; }
     cart.setCouponCode(found.code);
     setCode(found.code);
     toast.success(`${found.code} applied!`);
   };
 
   const place = async () => {
-    if (!selectedAddress) return toast.error("Add a delivery address");
+    if (!selectedAddress) { toast.error("Add a delivery address"); return; }
     if (!cart.restaurant_id) return;
     setPlacing(true);
     const { data, error } = await supabase.rpc("place_order", {
@@ -65,7 +65,7 @@ function Checkout() {
       _coupon_code: cart.couponCode ?? "",
       _items: cart.items.map((i) => ({ menu_item_id: i.menu_item_id, quantity: i.quantity })),
     });
-    if (error || !data) { setPlacing(false); return toast.error(error?.message ?? "Could not place order"); }
+    if (error || !data) { setPlacing(false); { toast.error(error?.message ?? "Could not place order"); return; } }
     notifyNewOrder({ data: { orderId: data } }).catch(() => {});
     cart.clear();
     navigate({ to: "/orders/$id", params: { id: data }, search: { success: true } });

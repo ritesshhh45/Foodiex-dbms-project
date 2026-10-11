@@ -23,7 +23,7 @@ export const notifyNewOrder = createServerFn({ method: "POST" })
     const text = buildOrderMessage({
       id: o.id, order_no: o.order_no, created_at: o.created_at, total: o.total, delivery_address: o.delivery_address,
       customer_name: p?.full_name ?? "", customer_phone: p?.phone ?? null,
-      restaurant_name: o.restaurants?.name ?? "", payment_method: o.payments?.[0]?.method ?? "cod",
+      restaurant_name: o.restaurants?.name ?? "", payment_method: (o.payments as unknown as { method: string } | null)?.method ?? "cod",
       items: o.order_items,
     });
 

@@ -13,7 +13,7 @@ export function AddressForm({ onSaved }: { onSaved: () => void }) {
       className="grid gap-3 rounded-2xl border border-dashed bg-muted/40 p-4 sm:grid-cols-2"
       onSubmit={async (e) => {
         e.preventDefault();
-        if (!user) return;
+        if (!user) return undefined;
         const f = new FormData(e.currentTarget);
         setBusy(true);
         const { error } = await supabase.from("addresses").insert({
@@ -24,7 +24,7 @@ export function AddressForm({ onSaved }: { onSaved: () => void }) {
           pincode: String(f.get("pincode")),
         });
         setBusy(false);
-        if (error) return toast.error(error.message.includes("pincode") ? "Pincode must be 6 digits" : error.message);
+        if (error) { toast.error(error.message.includes("pincode") ? "Pincode must be 6 digits" : error.message); return undefined; }
         toast.success("Address saved");
         e.currentTarget.reset();
         onSaved();
