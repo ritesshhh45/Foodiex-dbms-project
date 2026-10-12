@@ -14,7 +14,7 @@ export function Footer() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 md:grid-cols-3">
         <div className="space-y-3">
           <Logo />
-          <p className="max-w-xs text-sm text-muted-foreground">Hot food from Pune's favourite kitchens, delivered fast.</p>
+          <p className="max-w-xs text-sm text-muted-foreground">Hot food from Chhatrapati Sambhajinagar's favourite kitchens, delivered fast.</p>
         </div>
         <div>
           <h4 className="mb-3 font-bold">Quick links</h4>

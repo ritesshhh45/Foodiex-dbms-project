@@ -21,7 +21,7 @@ CREATE TABLE public.addresses (
   user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   label text NOT NULL DEFAULT 'Home',
   line1 text NOT NULL,
-  city text NOT NULL DEFAULT 'Pune',
+  city text NOT NULL DEFAULT 'Chhatrapati Sambhajinagar',
   pincode text NOT NULL CHECK (pincode ~ '^[0-9]{6}$'),
   is_default boolean NOT NULL DEFAULT false,
   created_at timestamptz NOT NULL DEFAULT now()
@@ -335,7 +335,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 INSERT INTO public.coupons (code, description, discount_percent, max_discount, min_order) VALUES
 ('WELCOME50','50% off up to ₹100 on orders above ₹149', 50, 100, 149),
 ('FOODIE20','20% off up to ₹80 on orders above ₹199', 20, 80, 199),
-('PUNE100','25% off up to ₹100 on orders above ₹399', 25, 100, 399),
+('SAMBHAJINAGAR100','25% off up to ₹100 on orders above ₹399', 25, 100, 399),
 ('BIRYANI15','15% off up to ₹60 on orders above ₹249', 15, 60, 249),
 ('MEGA30','30% off up to ₹150 on orders above ₹599', 30, 150, 599);
 INSERT INTO public.delivery_partners (name, phone, vehicle_no) VALUES
@@ -356,18 +356,18 @@ INSERT INTO public.categories (name, sort_order, image_url) VALUES
 ('Desserts & Drinks', 8, 'https://images.unsplash.com/photo-1563805042-7684c019e1cb?w=800&q=80');
 
 INSERT INTO public.restaurants (name, cuisine, description, image_url, address, eta_minutes, cost_for_two, offer_text, avg_rating, is_approved) VALUES
-('Burger Barn', 'Burger', 'Juicy smash burgers & loaded fries', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80', 'Koregaon Park, Pune', 25, 350, '50% OFF up to ₹100', 4.4, true),
-('Mumbai Street Bites', 'Burger', 'Desi-style burgers and street snacks', 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80', 'Shivaji Nagar, Pune', 20, 250, 'Free delivery', 4.2, true),
-('Pizza Piazza', 'Pizza', 'Wood-fired Neapolitan pizzas', 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80', 'Baner, Pune', 35, 600, 'Buy 1 Get 1', 4.6, true),
-('La Forno Express', 'Pizza', 'Thin-crust pizzas, fast', 'https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=800&q=80', 'Kothrud, Pune', 30, 450, '20% OFF', 4.1, true),
-('Biryani Darbar', 'Biryani & Rice', 'Dum-cooked Hyderabadi biryani', 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&q=80', 'Camp, Pune', 40, 500, '₹125 OFF above ₹499', 4.7, true),
-('Aai''s Kitchen', 'Maharashtrian', 'Homestyle Maharashtrian thali & snacks', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80', 'Sadashiv Peth, Pune', 25, 300, '10% OFF', 4.5, true),
-('Puneri Katta', 'Maharashtrian', 'Misal, vada pav & Puneri classics', 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=800&q=80', 'Deccan, Pune', 20, 200, 'Free delivery', 4.8, true),
-('Udupi Swaad', 'South Indian', 'Crispy dosas & fluffy idlis', 'https://images.unsplash.com/photo-1630383249896-424e482df921?w=800&q=80', 'FC Road, Pune', 25, 250, '15% OFF', 4.5, true),
-('Wok This Way', 'Chinese', 'Indo-Chinese wok tossed favourites', 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=800&q=80', 'Viman Nagar, Pune', 30, 400, '₹75 OFF', 4.3, true),
-('Punjab Da Dhaba', 'North Indian', 'Butter-rich Punjabi curries & naan', 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80', 'Hinjewadi, Pune', 35, 550, '20% OFF up to ₹120', 4.6, true),
-('Sweet Tooth Café', 'Desserts & Drinks', 'Cakes, brownies & sundaes', 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800&q=80', 'Aundh, Pune', 20, 300, 'Buy 2 Get 1', 4.7, true),
-('Chai & Shakes Co.', 'Desserts & Drinks', 'Chai, cold coffee & thick shakes', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80', 'Wakad, Pune', 15, 200, 'Free delivery', 4.4, true);
+('Burger Barn', 'Burger', 'Juicy smash burgers & loaded fries', 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80', 'Koregaon Park, Chhatrapati Sambhajinagar', 25, 350, '50% OFF up to ₹100', 4.4, true),
+('Mumbai Street Bites', 'Burger', 'Desi-style burgers and street snacks', 'https://images.unsplash.com/photo-1550547660-d9450f859349?w=800&q=80', 'Shivaji Nagar, Chhatrapati Sambhajinagar', 20, 250, 'Free delivery', 4.2, true),
+('Pizza Piazza', 'Pizza', 'Wood-fired Neapolitan pizzas', 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=800&q=80', 'Baner, Chhatrapati Sambhajinagar', 35, 600, 'Buy 1 Get 1', 4.6, true),
+('La Forno Express', 'Pizza', 'Thin-crust pizzas, fast', 'https://images.unsplash.com/photo-1594007654729-407eedc4be65?w=800&q=80', 'Kothrud, Chhatrapati Sambhajinagar', 30, 450, '20% OFF', 4.1, true),
+('Biryani Darbar', 'Biryani & Rice', 'Dum-cooked Hyderabadi biryani', 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&q=80', 'Camp, Chhatrapati Sambhajinagar', 40, 500, '₹125 OFF above ₹499', 4.7, true),
+('Aai''s Kitchen', 'Maharashtrian', 'Homestyle Maharashtrian thali & snacks', 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=800&q=80', 'Sadashiv Peth, Chhatrapati Sambhajinagar', 25, 300, '10% OFF', 4.5, true),
+('marathwada Katta', 'Maharashtrian', 'Misal, vada pav & sambhajinagar's classics', 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=800&q=80', 'Deccan, Chhatrapati Sambhajinagar', 20, 200, 'Free delivery', 4.8, true),
+('Udupi Swaad', 'South Indian', 'Crispy dosas & fluffy idlis', 'https://images.unsplash.com/photo-1630383249896-424e482df921?w=800&q=80', 'FC Road, Chhatrapati Sambhajinagar', 25, 250, '15% OFF', 4.5, true),
+('Wok This Way', 'Chinese', 'Indo-Chinese wok tossed favourites', 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=800&q=80', 'Viman Nagar, Chhatrapati Sambhajinagar', 30, 400, '₹75 OFF', 4.3, true),
+('Punjab Da Dhaba', 'North Indian', 'Butter-rich Punjabi curries & naan', 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80', 'Hinjewadi, Chhatrapati Sambhajinagar', 35, 550, '20% OFF up to ₹120', 4.6, true),
+('Sweet Tooth Café', 'Desserts & Drinks', 'Cakes, brownies & sundaes', 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=800&q=80', 'Aundh, Chhatrapati Sambhajinagar', 20, 300, 'Buy 2 Get 1', 4.7, true),
+('Chai & Shakes Co.', 'Desserts & Drinks', 'Chai, cold coffee & thick shakes', 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=800&q=80', 'Wakad, Chhatrapati Sambhajinagar', 15, 200, 'Free delivery', 4.4, true);
 
 INSERT INTO public.menu_items (restaurant_id, category_id, name, price, is_veg, rating, description, image_url)
 SELECT r.id, c.id, v.name, v.price, v.veg, v.rating, v.descr, 'https://images.unsplash.com/photo-' || v.img || '?w=800&q=80'
@@ -405,7 +405,7 @@ FROM (VALUES
 (6,'Kothimbir Vadi',99,true,4.4,'Crispy coriander gram-flour fritters','1567188040759-fb8a883dc6d8'),
 (6,'Sabudana Khichdi',99,true,4.5,'Tapioca pearls with peanuts and green chilli','1606755962773-d324e0a13086'),
 (6,'Bharli Vangi with Bhakri',169,true,4.6,'Stuffed brinjal curry with jowar bhakri','1606491956689-2ea866880c84'),
-(7,'Puneri Misal Pav',119,true,4.8,'Fiery sprouted moth curry, farsan, pav','1601050690597-df0568f70950'),
+(7,'Chhatrapati Sambhajinagar Misal Pav',119,true,4.8,'Fiery sprouted moth curry, farsan, pav','1601050690597-df0568f70950'),
 (7,'Vada Pav',39,true,4.7,'Spiced potato vada, garlic chutney, soft pav','1567188040759-fb8a883dc6d8'),
 (7,'Pav Bhaji',139,true,4.7,'Buttery mashed veggie bhaji with toasted pav','1606755962773-d324e0a13086'),
 (7,'Kolhapuri Chicken Rassa',249,false,4.6,'Spicy Kolhapuri chicken in tambda rassa','1606491956689-2ea866880c84'),
@@ -445,6 +445,6 @@ FROM (VALUES
 (12,'Mango Lassi',99,true,4.7,'Alphonso mango blended with creamy curd','1563805042-7684c019e1cb'),
 (12,'Oreo Thick Shake',149,true,4.5,'Crushed Oreo cookies blended thick','1551024506-0bccd828d307')
 ) AS v(ridx, name, price, veg, rating, descr, img)
-JOIN (VALUES (1,'Burger Barn'),(2,'Mumbai Street Bites'),(3,'Pizza Piazza'),(4,'La Forno Express'),(5,'Biryani Darbar'),(6,'Aai''s Kitchen'),(7,'Puneri Katta'),(8,'Udupi Swaad'),(9,'Wok This Way'),(10,'Punjab Da Dhaba'),(11,'Sweet Tooth Café'),(12,'Chai & Shakes Co.')) AS m(ridx, rname) ON m.ridx = v.ridx
+JOIN (VALUES (1,'Burger Barn'),(2,'Mumbai Street Bites'),(3,'Pizza Piazza'),(4,'La Forno Express'),(5,'Biryani Darbar'),(6,'Aai''s Kitchen'),(7,'Marathwada Katta'),(8,'Udupi Swaad'),(9,'Wok This Way'),(10,'Punjab Da Dhaba'),(11,'Sweet Tooth Café'),(12,'Chai & Shakes Co.')) AS m(ridx, rname) ON m.ridx = v.ridx
 JOIN public.restaurants r ON r.name = m.rname
 JOIN public.categories c ON c.name = r.cuisine;

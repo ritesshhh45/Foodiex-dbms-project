@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Search, SlidersHorizontal } from "lucide-react";
@@ -24,13 +24,16 @@ export const Route = createFileRoute("/restaurants/")({
   head: () => ({
     meta: [
       { title: "Restaurants near you — FoodieX" },
-      { name: "description", content: "Browse Pune restaurants by cuisine, rating, delivery time and price." },
+      { name: "description", content: "Browse Chhatrapati Sambhajinagar restaurants by cuisine, rating, delivery time and price." },
       { property: "og:title", content: "Restaurants near you — FoodieX" },
       { property: "og:description", content: "Filter by veg, rating, delivery time and price." },
     ],
   }),
   component: Listing,
 });
+
+// Cafes are shown on their own /cafes page, not in the restaurants list
+const isCafe = (r: unknown) => Boolean((r as { is_cafe?: boolean | null }).is_cafe);
 
 const listQuery = {
   queryKey: ["restaurants-with-menu"],
@@ -48,7 +51,7 @@ function Listing() {
   const { data, isLoading } = useQuery(listQuery);
   const { data: cats } = useQuery(categoriesQuery);
 
-  let list = data ?? [];
+  let list = (data ?? []).filter((r) => !isCafe(r));
   const q = s.q?.toLowerCase().trim();
   if (q) list = list.filter((r) => r.name.toLowerCase().includes(q) || r.cuisine.toLowerCase().includes(q) || r.menu_items.some((m) => m.name.toLowerCase().includes(q)));
   if (s.cuisine) list = list.filter((r) => r.cuisine === s.cuisine);
@@ -75,6 +78,7 @@ function Listing() {
       <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-2">
         <button className={chip(!s.cuisine)} onClick={() => set({ cuisine: undefined })}>All</button>
         {cats?.map((c) => <button key={c.id} className={chip(s.cuisine === c.name)} onClick={() => set({ cuisine: s.cuisine === c.name ? undefined : c.name })}>{c.name}</button>)}
+        <Link to="/cafes" className={chip(false)}>☕ Cafes</Link>
       </div>
       <div className="-mx-4 mt-2 flex items-center gap-2 overflow-x-auto px-4 pb-2">
         <SlidersHorizontal className="size-4 shrink-0 text-muted-foreground" />

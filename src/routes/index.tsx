@@ -8,8 +8,9 @@ import pizza from "@/assets/hero-pizza.png";
 import biryani from "@/assets/hero-biryani.png";
 import dosa from "@/assets/hero-dosa.png";
 import dessert from "@/assets/hero-dessert.png";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { bestSellersQuery, categoriesQuery, restaurantsQuery } from "@/lib/queries";
+import { bestSellersQuery, categoriesQuery } from "@/lib/queries";
 import { RestaurantCard } from "@/components/food/RestaurantCard";
 import { Skeleton, VegIcon, RatingPill } from "@/components/food/bits";
 import { inr } from "@/lib/bill";
@@ -17,14 +18,33 @@ import { inr } from "@/lib/bill";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "FoodieX — Hot food from Pune's best kitchens" },
-      { name: "description", content: "Order burgers, biryani, misal pav, dosa and desserts online. Live order tracking and fast delivery across Pune." },
-      { property: "og:title", content: "FoodieX — Hot food from Pune's best kitchens" },
+      { title: "FoodieX — Hot food from Chhatrapati Sambhajinagar's best kitchens" },
+      { name: "description", content: "Order burgers, biryani, misal pav, dosa and desserts online. Live order tracking and fast delivery across Chhatrapati Sambhajinagar." },
+      { property: "og:title", content: "FoodieX — Hot food from Chhatrapati Sambhajinagar's best kitchens" },
       { property: "og:description", content: "Order burgers, biryani, misal pav, dosa and desserts online with live tracking." },
     ],
   }),
   component: Home,
 });
+
+// A restaurant row is a cafe when its is_cafe flag is true
+const isCafe = (r: unknown) => Boolean((r as { is_cafe?: boolean | null }).is_cafe);
+
+const homeListQuery = {
+  queryKey: ["home-restaurants-and-cafes"],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from("restaurants")
+      .select("*")
+      .eq("is_approved", true)
+      .eq("is_blocked", false)
+      .order("avg_rating", { ascending: false });
+    if (error) throw error;
+    return data;
+  },
+};
+
+type Row = Awaited<ReturnType<typeof homeListQuery.queryFn>>[number];
 
 const WORDS = ["Biryani", "Misal Pav", "Pizza", "Dosa", "Burgers"];
 
@@ -91,13 +111,13 @@ function Hero() {
       <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 md:grid-cols-2 md:py-24">
         <div className="relative z-10 space-y-6">
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full bg-card/80 px-3 py-1 text-sm font-semibold shadow-soft">
-            <Bike className="size-4 text-primary" /> Delivering across Pune in 30 min
+            <Bike className="size-4 text-primary" /> Delivering across Chhatrapati Sambhajinagar in 30 min
           </motion.span>
           <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }} className="text-5xl font-extrabold leading-[1.02] md:text-7xl">
             Craving <br /><Typewriter /><br />right now?
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="max-w-md text-lg text-muted-foreground">
-            12 kitchens, 72 dishes and a scooter already warming up. Order in a few taps, track it live.
+            Restaurants, cafes and a scooter already warming up. Order in a few taps, track it live.
           </motion.p>
           <motion.form
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
@@ -158,17 +178,32 @@ function BestSellers() {
   );
 }
 
-function Popular() {
-  const { data, isLoading } = useQuery(restaurantsQuery);
+function Popular({ list, loading }: { list: Row[]; loading: boolean }) {
   return (
     <section className="mx-auto max-w-7xl px-4 pt-16">
       <div className="flex items-end justify-between">
-        <SectionTitle eyebrow="Loved by Pune" title="Popular Restaurants" />
+        <SectionTitle eyebrow="Loved by Chhatrapati Sambhajinagar" title="Popular Restaurants" />
         <Link to="/restaurants" className="mb-6 flex items-center gap-1 text-sm font-semibold text-primary">See all <ArrowRight className="size-4" /></Link>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        {isLoading && Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-72" />)}
-        {data?.slice(0, 8).map((r, i) => <RestaurantCard key={r.id} r={r} index={i} />)}
+        {loading && Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-72" />)}
+        {list.slice(0, 8).map((r, i) => <RestaurantCard key={r.id} r={r} index={i} />)}
+      </div>
+    </section>
+  );
+}
+
+function CafesSection({ list, loading }: { list: Row[]; loading: boolean }) {
+  if (!loading && list.length === 0) return null;
+  return (
+    <section className="mx-auto max-w-7xl px-4 pt-16">
+      <div className="flex items-end justify-between">
+        <SectionTitle eyebrow="Sip, chill & hang out" title="Cafes in Chhatrapati Sambhajinagar" />
+        <Link to="/cafes" className="mb-6 flex items-center gap-1 text-sm font-semibold text-primary">See all <ArrowRight className="size-4" /></Link>
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {loading && Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-72" />)}
+        {list.slice(0, 6).map((r, i) => <RestaurantCard key={r.id} r={r} index={i} />)}
       </div>
     </section>
   );
@@ -176,7 +211,7 @@ function Popular() {
 
 function HowItWorks() {
   const steps = [
-    { icon: MapPin, t: "Pick a kitchen", d: "Browse 12 restaurants near you" },
+    { icon: MapPin, t: "Pick a kitchen", d: "Browse restaurants and cafes near you" },
     { icon: ShoppingBag, t: "Fill your cart", d: "Apply a coupon, choose COD, UPI or card" },
     { icon: Bike, t: "Track it live", d: "Watch your order move, step by step" },
   ];
@@ -210,11 +245,12 @@ function Counter({ to, suffix }: { to: number; suffix: string }) {
   return <span ref={ref}>0{suffix}</span>;
 }
 
-function Stats() {
+// Stats come from real database counts (no fake numbers)
+function Stats({ restaurants, cafes, cuisines }: { restaurants: number; cafes: number; cuisines: number }) {
   const s = [
-    { n: 25000, s: "+", l: "Orders delivered" },
-    { n: 12, s: "", l: "Partner restaurants" },
-    { n: 18000, s: "+", l: "Happy customers" },
+    { n: restaurants, s: "", l: "Partner restaurants" },
+    { n: cafes, s: "", l: "Cafes" },
+    { n: cuisines, s: "", l: "Cuisines to explore" },
   ];
   return (
     <section className="mx-auto max-w-7xl px-4 pt-20">
@@ -242,14 +278,20 @@ function SectionTitle({ eyebrow, title, center }: { eyebrow: string; title: stri
 }
 
 function Home() {
+  const { data, isLoading } = useQuery(homeListQuery);
+  const { data: cats } = useQuery(categoriesQuery);
+  const all = data ?? [];
+  const restaurants = all.filter((r) => !isCafe(r));
+  const cafes = all.filter((r) => isCafe(r));
   return (
     <>
       <Hero />
       <Marquee />
       <BestSellers />
-      <Popular />
+      <Popular list={restaurants} loading={isLoading} />
+      <CafesSection list={cafes} loading={isLoading} />
       <HowItWorks />
-      <Stats />
+      <Stats restaurants={restaurants.length} cafes={cafes.length} cuisines={cats?.length ?? 0} />
     </>
   );
 }

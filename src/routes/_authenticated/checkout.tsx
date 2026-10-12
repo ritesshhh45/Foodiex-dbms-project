@@ -9,7 +9,6 @@ import { useCart } from "@/lib/cart";
 import { calculateBill, inr } from "@/lib/bill";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { AddressForm } from "@/components/food/AddressForm";
 import { AddButton, VegIcon } from "@/components/food/bits";
 import { notifyNewOrder } from "@/lib/notify.functions";
 import { cn } from "@/lib/utils";
@@ -33,6 +32,10 @@ function Checkout() {
   const [code, setCode] = useState(cart.couponCode ?? "");
   const [placing, setPlacing] = useState(false);
 
+  // address form (built into checkout)
+  const [form, setForm] = useState({ label: "Home", line1: "", city: "Chhatrapati Sambhajinagar", pincode: "" });
+  const [saving, setSaving] = useState(false);
+
   const addresses = useQuery({
     queryKey: ["addresses"],
     queryFn: async () => (await supabase.from("addresses").select("*").order("created_at")).data ?? [],
@@ -54,18 +57,59 @@ function Checkout() {
     toast.success(`${found.code} applied!`);
   };
 
+  // Saves the address in Supabase, selects it automatically and returns its id
+  const saveAddress = async (): Promise<string | null> => {
+    const line1 = form.line1.trim();
+    const city = form.city.trim();
+    const pincode = form.pincode.trim();
+    if (!line1 || !city) { toast.error("Please enter your full address and city"); return null; }
+    if (!/^[0-9]{6}$/.test(pincode)) { toast.error("Pincode must be exactly 6 digits"); return null; }
+
+    setSaving(true);
+    const { data: auth } = await supabase.auth.getUser();
+    const user = auth.user;
+    if (!user) { setSaving(false); toast.error("Please sign in again"); return null; }
+
+    const { data, error } = await supabase
+      .from("addresses")
+      .insert({ user_id: user.id, label: form.label.trim() || "Home", line1, city, pincode })
+      .select("id")
+      .single();
+    setSaving(false);
+
+    if (error || !data) { toast.error(error?.message ?? "Could not save address"); return null; }
+    setAddressId(data.id);
+    await addresses.refetch();
+    setForm((f) => ({ ...f, line1: "", pincode: "" }));
+    toast.success("Address saved");
+    return data.id;
+  };
+
   const place = async () => {
-    if (!selectedAddress) { toast.error("Add a delivery address"); return; }
     if (!cart.restaurant_id) return;
     setPlacing(true);
+
+    // use the selected address; if the form is filled but not saved yet, save it first
+    let addrId = selectedAddress;
+    if (!addrId && form.line1.trim()) addrId = await saveAddress();
+    if (!addrId) {
+      setPlacing(false);
+      toast.error("Please add a delivery address");
+      return;
+    }
+
     const { data, error } = await supabase.rpc("place_order", {
       _restaurant_id: cart.restaurant_id,
-      _address_id: selectedAddress,
+      _address_id: addrId,
       _payment_method: method,
       _coupon_code: cart.couponCode ?? "",
       _items: cart.items.map((i) => ({ menu_item_id: i.menu_item_id, quantity: i.quantity })),
     });
-    if (error || !data) { setPlacing(false); { toast.error(error?.message ?? "Could not place order"); return; } }
+    if (error || !data) {
+      setPlacing(false);
+      toast.error(error?.message ?? "Could not place order");
+      return;
+    }
     notifyNewOrder({ data: { orderId: data } }).catch(() => {});
     cart.clear();
     navigate({ to: "/orders/$id", params: { id: data }, search: { success: true } });
@@ -83,16 +127,28 @@ function Checkout() {
     <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_380px]">
       <div className="space-y-6">
         <Card title="Delivery address" icon={MapPin}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {addresses.data?.map((a) => (
-              <button key={a.id} onClick={() => setAddressId(a.id)} className={cn("relative rounded-2xl border p-4 text-left transition", selectedAddress === a.id ? "border-primary bg-secondary" : "hover:border-primary/50")}>
-                {selectedAddress === a.id && <Check className="absolute right-3 top-3 size-5 text-primary" />}
-                <p className="font-bold">{a.label}</p>
-                <p className="text-sm text-muted-foreground">{a.line1}, {a.city} – {a.pincode}</p>
-              </button>
-            ))}
+          {addresses.data && addresses.data.length > 0 && (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {addresses.data.map((a) => (
+                <button key={a.id} onClick={() => setAddressId(a.id)} className={cn("relative rounded-2xl border p-4 text-left transition", selectedAddress === a.id ? "border-primary bg-secondary" : "hover:border-primary/50")}>
+                  {selectedAddress === a.id && <Check className="absolute right-3 top-3 size-5 text-primary" />}
+                  <p className="font-bold">{a.label}</p>
+                  <p className="text-sm text-muted-foreground">{a.line1}, {a.city} – {a.pincode}</p>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="mt-3 rounded-2xl border border-dashed p-4">
+            <p className="mb-3 text-sm font-semibold">Add a new address</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Input value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="Label (Home / Work)" />
+              <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="City" />
+              <Input className="sm:col-span-2" value={form.line1} onChange={(e) => setForm({ ...form, line1: e.target.value })} placeholder="House no, street, area" />
+              <Input value={form.pincode} inputMode="numeric" maxLength={6} onChange={(e) => setForm({ ...form, pincode: e.target.value.replace(/\D/g, "") })} placeholder="Pincode (6 digits)" />
+              <Button type="button" disabled={saving} onClick={() => { void saveAddress(); }}>{saving ? "Saving…" : "Save address"}</Button>
+            </div>
           </div>
-          <div className="mt-3"><AddressForm onSaved={() => addresses.refetch()} /></div>
         </Card>
 
         <Card title="Payment method" icon={Wallet}>
