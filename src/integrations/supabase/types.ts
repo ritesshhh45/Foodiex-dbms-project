@@ -23,6 +23,7 @@ export type Database = {
           label: string
           line1: string
           pincode: string
+          state: string
           user_id: string
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           label?: string
           line1: string
           pincode: string
+          state?: string
           user_id: string
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           label?: string
           line1?: string
           pincode?: string
+          state?: string
           user_id?: string
         }
         Relationships: [
@@ -182,6 +185,36 @@ export type Database = {
           is_active?: boolean
           max_discount?: number
           min_order?: number
+        }
+        Relationships: []
+      }
+      dbms_queries: {
+        Row: {
+          id: number
+          kind: string
+          question: string
+          sql: string
+          topic: string
+          used_in: string
+          verify_sql: string | null
+        }
+        Insert: {
+          id: number
+          kind?: string
+          question: string
+          sql: string
+          topic: string
+          used_in: string
+          verify_sql?: string | null
+        }
+        Update: {
+          id?: number
+          kind?: string
+          question?: string
+          sql?: string
+          topic?: string
+          used_in?: string
+          verify_sql?: string | null
         }
         Relationships: []
       }
@@ -589,6 +622,8 @@ export type Database = {
           image_url: string | null
           is_approved: boolean
           is_blocked: boolean
+          is_cafe: boolean
+          logo_url: string | null
           name: string
           offer_text: string | null
           owner_id: string | null
@@ -606,6 +641,8 @@ export type Database = {
           image_url?: string | null
           is_approved?: boolean
           is_blocked?: boolean
+          is_cafe?: boolean
+          logo_url?: string | null
           name: string
           offer_text?: string | null
           owner_id?: string | null
@@ -623,6 +660,8 @@ export type Database = {
           image_url?: string | null
           is_approved?: boolean
           is_blocked?: boolean
+          is_cafe?: boolean
+          logo_url?: string | null
           name?: string
           offer_text?: string | null
           owner_id?: string | null
@@ -800,6 +839,10 @@ export type Database = {
           _restaurant_id: string
         }
         Returns: string
+      }
+      run_dbms_query: {
+        Args: { _id: number; _passcode: string }
+        Returns: Json
       }
     }
     Enums: {
