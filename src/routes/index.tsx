@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { motion, useScroll, useTransform, useInView, animate } from "framer-motion";
+import { motion, useInView, animate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { Search, ShoppingBag, MapPin, Bike, UtensilsCrossed, ArrowRight } from "lucide-react";
 import burger from "@/assets/hero-burger.png";
@@ -68,36 +68,69 @@ function Typewriter() {
   );
 }
 
-const FLOATERS = [
-  { src: burger, cls: "left-[2%] top-[6%] w-40 md:w-56", d: 0, depth: 120 },
-  { src: pizza, cls: "right-[0%] top-[0%] w-44 md:w-64", d: 0.6, depth: -80 },
-  { src: biryani, cls: "right-[30%] bottom-[2%] w-36 md:w-52", d: 1.2, depth: 160 },
-  { src: dosa, cls: "left-[18%] bottom-[0%] w-40 md:w-56", d: 0.3, depth: -60 },
-  { src: dessert, cls: "right-[6%] bottom-[18%] w-28 md:w-40", d: 0.9, depth: 100 },
+// Foods orbit around a spinning pizza. Everything is sized in % of the stage, so it stays inside the screen on mobile.
+const ORBIT = [
+  { src: burger,  pos: "left-[22%] top-[24%]", size: "w-[34%]", dur: 5.5, dx: 9,  dy: 14, rot: 6, delay: 0.3 },
+  { src: dessert, pos: "left-[82%] top-[26%]", size: "w-[20%]", dur: 4.5, dx: -7, dy: 12, rot: 9, delay: 0.5 },
+  { src: biryani, pos: "left-[76%] top-[77%]", size: "w-[36%]", dur: 6.5, dx: -10, dy: -14, rot: 5, delay: 0.7 },
+  { src: dosa,    pos: "left-[24%] top-[78%]", size: "w-[36%]", dur: 6,   dx: 10, dy: -12, rot: 6, delay: 0.9 },
 ];
 
-function Floater({ f, i }: { f: (typeof FLOATERS)[number]; i: number }) {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 600], [0, f.depth]);
+function FoodStage() {
   return (
-    <motion.div style={{ y }} className={`absolute ${f.cls}`}>
-      <motion.img
-        src={f.src}
-        alt=""
-        width={816}
-        height={816}
-        initial={{ opacity: 0, scale: 0.5, rotate: -20 }}
-        animate={{ opacity: 1, scale: 1, rotate: 0, y: [0, -18, 0] }}
-        transition={{
-          opacity: { delay: 0.2 + i * 0.12, duration: 0.6 },
-          scale: { delay: 0.2 + i * 0.12, type: "spring" },
-          rotate: { delay: 0.2 + i * 0.12, duration: 0.8 },
-          y: { repeat: Infinity, duration: 4 + i * 0.7, ease: "easeInOut", delay: f.d },
-        }}
-        whileHover={{ rotate: 12, scale: 1.08 }}
-        className="drop-shadow-2xl"
+    <div className="relative mx-auto aspect-square w-full max-w-[340px] sm:max-w-[420px] md:max-w-[520px]">
+      {/* glow + slowly rotating dashed ring */}
+      <div className="absolute inset-[14%] rounded-full bg-primary/20 blur-2xl" />
+      <motion.div
+        className="absolute inset-[6%] rounded-full border-2 border-dashed border-primary/30"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
       />
-    </motion.div>
+
+      {/* spinning pizza in the centre */}
+      <motion.div
+        className="absolute left-1/2 top-1/2 w-[46%] -translate-x-1/2 -translate-y-1/2"
+        initial={{ opacity: 0, scale: 0.3 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", delay: 0.1, stiffness: 120, damping: 14 }}
+      >
+        <motion.img
+          src={pizza}
+          alt="Pizza"
+          width={816}
+          height={816}
+          className="drop-shadow-2xl"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+        />
+      </motion.div>
+
+      {/* other dishes: pop in, then drift in a smooth loop while gently tilting */}
+      {ORBIT.map((f, i) => (
+        <div key={i} className={`absolute ${f.pos} ${f.size} -translate-x-1/2 -translate-y-1/2`}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3, rotate: -25 }}
+            animate={{ opacity: 1, scale: 1, rotate: 0 }}
+            transition={{ type: "spring", delay: f.delay, stiffness: 110, damping: 13 }}
+          >
+            <motion.img
+              src={f.src}
+              alt=""
+              width={816}
+              height={816}
+              className="drop-shadow-2xl"
+              animate={{
+                x: [0, f.dx, 0, -f.dx, 0],
+                y: [0, -f.dy, 0, f.dy, 0],
+                rotate: [-f.rot, f.rot, -f.rot],
+              }}
+              transition={{ duration: f.dur, repeat: Infinity, ease: "easeInOut" }}
+              whileTap={{ scale: 1.1 }}
+            />
+          </motion.div>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -108,7 +141,7 @@ function Hero() {
     <section className="relative overflow-hidden bg-hero">
       <div className="pointer-events-none absolute -left-20 top-10 size-72 rounded-full bg-primary/25 blur-3xl animate-blob" />
       <div className="pointer-events-none absolute right-0 top-40 size-80 rounded-full bg-chart-2/30 blur-3xl animate-blob [animation-delay:3s]" />
-      <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-14 md:grid-cols-2 md:py-24">
+      <div className="mx-auto grid max-w-7xl items-center gap-8 px-4 py-10 md:grid-cols-2 md:py-24">
         <div className="relative z-10 space-y-6">
           <motion.span initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 rounded-full bg-card/80 px-3 py-1 text-sm font-semibold shadow-soft">
             <Bike className="size-4 text-primary" /> Delivering across Chhatrapati Sambhajinagar in 30 min
@@ -124,14 +157,12 @@ function Hero() {
             onSubmit={(e) => { e.preventDefault(); navigate({ to: "/restaurants", search: { q } }); }}
             className="flex max-w-lg items-center gap-2 rounded-2xl border bg-card p-2 shadow-lift"
           >
-            <Search className="ml-2 size-5 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search for misal, biryani, pizza…" className="h-11 flex-1 bg-transparent text-base outline-none" />
-            <Button type="submit" variant="hero" className="animate-pulse-ring h-11 px-5">Order Now</Button>
+            <Search className="ml-2 size-5 shrink-0 text-muted-foreground" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search for misal, biryani, pizza…" className="h-11 min-w-0 flex-1 bg-transparent text-base outline-none" />
+            <Button type="submit" variant="hero" className="animate-pulse-ring h-11 shrink-0 px-5">Order Now</Button>
           </motion.form>
         </div>
-        <div className="relative h-[360px] md:h-[520px]">
-          {FLOATERS.map((f, i) => <Floater key={i} f={f} i={i} />)}
-        </div>
+        <FoodStage />
       </div>
     </section>
   );
@@ -284,7 +315,7 @@ function Home() {
   const restaurants = all.filter((r) => !isCafe(r));
   const cafes = all.filter((r) => isCafe(r));
   return (
-    <>
+    <div className="overflow-x-clip">
       <Hero />
       <Marquee />
       <BestSellers />
@@ -292,6 +323,6 @@ function Home() {
       <CafesSection list={cafes} loading={isLoading} />
       <HowItWorks />
       <Stats restaurants={restaurants.length} cafes={cafes.length} cuisines={cats?.length ?? 0} />
-    </>
+    </div>
   );
 }
