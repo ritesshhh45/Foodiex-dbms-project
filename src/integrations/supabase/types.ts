@@ -787,6 +787,26 @@ export type Database = {
           },
         ]
       }
+      order_details: {
+        Row: {
+          created_at: string | null
+          customer: string | null
+          delivery_address: string | null
+          delivery_fee: number | null
+          discount: number | null
+          gst: number | null
+          items: string | null
+          order_no: number | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
+          payment_status: string | null
+          phone: string | null
+          restaurant: string | null
+          status: Database["public"]["Enums"]["order_status"] | null
+          subtotal: number | null
+          total: number | null
+        }
+        Relationships: []
+      }
       order_summary: {
         Row: {
           created_at: string | null
